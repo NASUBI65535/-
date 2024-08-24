@@ -196,10 +196,14 @@ def shrink_mov_files(self):
     def find_files(root_dir, extension):
         matches = []
         num = 0
+        j = 0
         for root, dirnames, filenames in os.walk(root_dir):
             for filename in fnmatch.filter(filenames, f"*.{extension}"):
                 matches.append(os.path.join(root, filename))
-                num+=1
+                name=matches[j].replace('\\', '/')
+                j+=1
+                if os.path.abspath(os.path.join(name, os.pardir)).replace('\\', '/') == root_dir :
+                    num+=1
         return num
     # 入力ファイルの選択
     filepaths = self.entry_01.get().replace('\\', '/')#self.ask_input_filenames("動画ファイルを選んでください", types=[('', frm_str)])
@@ -230,7 +234,7 @@ def shrink_mov_files(self):
                     if not os.path.exists(f"{filename}/result"):
                         os.makedirs(f"{filename}/result")
                     if not os.path.exists(output_file):
-                        command = (f'ffmpeg -i "{file}" -c:a copy -c:v libx265 -crf {crf} "{output_file}"')
+                        command = (f'ffmpeg -i "{file}" -c:a copy -c:v h264 -crf {crf} "{output_file}" -preset varyfast')
                         p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True,universal_newlines=True,encoding='utf-8')
                         probe = ffmpeg.probe(file)
                         for stream in probe['streams']:
@@ -239,7 +243,7 @@ def shrink_mov_files(self):
                                 #pprint(stream)  # Python3.8からsort_dicts=Falseが使える
                                 for line in p.stdout:
                                     #self.info.insert(tk.END, f"{line}\n")
-                                    if line[:7] == "frame= ":
+                                    if line[:6] == "frame=":
                                         idx = line.find("fps=")
                                         frame = line[:idx].replace(' ', '')
                                         frame = int(frame.replace('frame=', ''))
@@ -280,7 +284,7 @@ def shrink_mov_files(self):
                 output_file = str(f"{dirname}/{base_filename}_圧縮.mp4")
                 #print(input_file)
                 if not os.path.exists(output_file):
-                    command = (f'ffmpeg -i "{input_file}" -c:a copy -c:v libx265 -crf {crf} "{output_file}"')
+                    command = (f'ffmpeg -i "{input_file}" -c:a copy -c:v h264 -crf {crf} "{output_file}" -preset varyfast')
                     #print(222222)
                     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True,universal_newlines=True,encoding='utf-8')
                     probe = ffmpeg.probe(input_file)
@@ -290,12 +294,13 @@ def shrink_mov_files(self):
                             pprint(stream)  # Python3.8からsort_dicts=Falseが使える
                             for line in p.stdout:
                                 #self.info.insert(tk.END, f"{line}\n")
-                                if line[:7] == "frame= ":
+                                # print(line)
+                                if line[:6] == "frame=":
                                     idx = line.find("fps=")
                                     frame = line[:idx].replace(' ', '')
                                     frame = int(frame.replace('frame=', ''))
-                                    #print(frame)
-                                    #print(stream['nb_frames'])
+                                    # print(frame)
+                                    # print(stream['nb_frames'])
                                     #print(stream['duration_ts'])
                                     total = int(stream['nb_frames'])
                                     pow = (frame/total)*100.0
