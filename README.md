@@ -25,7 +25,7 @@ resultフォルダにまとめて出力します
 
 〇DLできない
 
-→ffmpeg.exeとffprobe.exeはmp4圧縮.exeと同じ階層にありますか？
+→ffmpeg.exeとffprobe.exeは動画圧縮ツール.exeと同じ階層にありますか？
 
 
 Q：なんでコンソール出すんですか？
